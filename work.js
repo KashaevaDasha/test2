@@ -1,90 +1,101 @@
-/*Напишите функцию-конструктор Calculator, которая создает объект с тремя методами:
-Метод read() запрашивает два значения при помощи prompt и запоминает их в свойствах объекта.
-Метод sum() возвращает сумму запомненных свойств.
-Метод mul() возвращает произведение запомненных свойств.*/
+/*Когда кофеварку выключают – текущая варка кофе должна останавливаться.
 
-function Calculator() {
-	this.read = function() {
-		this.a = +prompt('1 = ');
-		this.b = +prompt('2 = ');
-	};
-	this.sum = function() {
-		return this.a + this.b;
-	};
-	this.mul = function() {
-		return this.a * this.b;
-	};
-}
+Например, следующий код кофе не сварит:
+var coffeeMachine = new CoffeeMachine(10000);
+coffeeMachine.enable();
+coffeeMachine.run();
+coffeeMachine.disable(); // остановит работу, ничего не выведет*/
 
-var calculator = new Calculator();
+(function() {
 
-calculator.read();
-console.log("Сумма=" + calculator.sum());
-console.log("Произведение=" + calculator.mul());
+  'use strict';
 
-/*Напишите функцию-конструктор Accumulator(startingValue).
-Объекты, которые она создает, должны хранить текущую сумму и прибавлять к ней то, что вводит посетитель.
-Более формально, объект должен:
-	Хранить текущее значение в своём свойстве value.
-Начальное значение свойства value ставится конструктором равным startingValue.
-	Метод read() вызывает prompt, принимает число и прибавляет его к свойству value.
-	Таким образом, свойство value является текущей суммой всего,
-что ввел посетитель при вызовах метода read(), с учетом начального значения startingValue.*/
+  function Machine() { //родитель
+    this._enabled = false;
+    this.enable = function() {
+      this._enabled = true;
+    };
+    this.disable = function() {
+      this._enabled = false;
+    };
+  }
 
-function Accumulator(startingValue) {
-	this.value = startingValue;
-	this.read = function() {
-		this.value += +prompt('Введите число = ');
-	};
-}
-var accumulator = new Accumulator(1); // начальное значение 1
-accumulator.read(); // прибавит ввод prompt к текущему значению
-accumulator.read(); // прибавит ввод prompt к текущему значению
-console.log(accumulator.value); // выведет текущее значение
+  function CoffeeMachine(power, waterCapacity) { //наследник
+    Machine.apply(this);
+    var id, waterAmount = 0;
 
-/*	Напишите конструктор Calculator, который создаёт расширяемые объекты-калькуляторы.
-	Эта задача состоит из двух частей, которые можно решать одна за другой.
-	Первый шаг задачи: вызов calculate(str) принимает строку, например «1 + 2»
-с жёстко заданным форматом «ЧИСЛО операция ЧИСЛО» (по одному пробелу вокруг операции),
-и возвращает результат. Понимает плюс + и минус -.
-	Второй шаг – добавить калькулятору метод addMethod(name, func), который учит калькулятор новой операции.
-Он получает имя операции name и функцию от двух аргументов func(a,b), которая должна её реализовывать.*/
+    var oldEnable = this.enable.bind(this);
+    //переопределение методов
+    this.enable = function() {
+      console.log('Включилась зеленая лампочка!');
+      oldEnable();
+    };
 
-function Calculator2() {
-	var symbols = {
-		"-": function(a, b) {
-			return a - b;
-		},
-		"+": function(a, b) {
-			return a + b;
-		}
-	};
-	this.calculate = function(str) {
-		var split = str.split(' '),
-			a = +split[0],
-			symb = split[1],
-			b = +split[2];
-		if (!methods[symb] || isNaN(a) || isNaN(b)) {//ЕСЛИ нет символа, либо невозможно преваратить в число
-			return NaN;
-		}
-		return symbols[symb](+a, +b);
-	}
-	this.addMethod = function(name, func) {
-		symbols[name] = func;
-	};
-}
-var calc = new Calculator2;
-console.log(calc.calculate("3 + 7"));
+    var oldDisable = this.disable.bind(this);
+    //переопределение методов
+    this.disable = function() {
+      oldDisable();
+      //просто остановив
+      //clearTimeout(id);
+      //или
+      this.stop();
+    };
 
-var powerCalc = new Calculator2;
-powerCalc.addMethod("*", function(a, b) {
-	return a * b;
-});
-powerCalc.addMethod("/", function(a, b) {
-	return a / b;
-});
-powerCalc.addMethod("**", function(a, b) {
-	return Math.pow(a, b);
-});
-var result = powerCalc.calculate("2 ** 3");
-console.log(result);
+    this.water = function(value) {
+      if (typeof value !== 'undefined') {
+        if (waterAmount + value <= waterCapacity) {
+          waterAmount += value;
+        } else {
+          waterAmount = waterCapacity;
+          console.log('Вылилось: ' + (value - waterCapacity));
+        }
+      } else {
+        return waterAmount;
+      }
+    };
+
+    var WATER_HEAT_CAPACITY = 4200;
+
+    var getBoilTime = function() {
+      var res = waterAmount * WATER_HEAT_CAPACITY * 80 / power;
+      console.log(res);
+      return res;
+    };
+
+    var onReady = function() {
+     console.log('Кофе готов!');
+    };
+
+    this.setReady = function(myFunc) {
+      if (typeof myFunc == 'function') {
+        onReady = myFunc;
+      }
+    };
+
+    this.run = function() {
+      if (!this._enabled) {
+         throw new Error("Кофеварка выключена");
+      }
+      if (!waterAmount) {
+        console.log('Сухого кофе??');
+      } else {
+        id = setTimeout(onReady, 3000);
+      }
+    };
+
+    this.stop = function() {
+      clearTimeout(id);
+      console.log('STOP');
+    };
+  }
+
+  var coffee = new CoffeeMachine(1000, 2000);
+
+  coffee.water(2500);
+  coffee.enable();
+  coffee.run();
+  coffee.setReady(function() {
+    console.log('%cКушать %cподано!', 'background: green; fontSize: 15px; color: #fff;', 'background: red; fontSize: 15px; color: #CC01;');
+  });
+  coffee.disable();
+})();

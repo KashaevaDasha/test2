@@ -1,101 +1,86 @@
-/*Когда кофеварку выключают – текущая варка кофе должна останавливаться.
-
-Например, следующий код кофе не сварит:
-var coffeeMachine = new CoffeeMachine(10000);
-coffeeMachine.enable();
-coffeeMachine.run();
-coffeeMachine.disable(); // остановит работу, ничего не выведет*/
-
+/* 1. Реализовать такое поведение, при котором при пробеге одной лошадью определенной дистанции,
+увеличивается также свойство общего пробега  для всех лошадей данного класса.
+т.е. свой пробег станет допустим 10 км, общий пробег увеличится на 10км
+   2. Добавить лошадкам свойство `усталость`.
+Когда лошадка пробегает 1км, у нее увеличивается усталость на единицу.
+Максимальная усталость - 10 единиц.
+Когда лошадь достигает максимальной усталости, она ложится отдыхать 1 секунду,
+усталость сбрасывается в ноль.
+После отдыха, лошадь добегает оставшиеся километры, с учетом увеличения усталости, т.е. как в предыдущем пункте.
+ */
 (function() {
-
   'use strict';
 
-  function Machine() { //родитель
-    this._enabled = false;
-    this.enable = function() {
-      this._enabled = true;
-    };
-    this.disable = function() {
-      this._enabled = false;
-    };
+  /*Добавить всем ф-иям в прототип метод обёртку defer(ms),
+  который возвращает обертку, откладыввающую вызов ф-ии на ms милдисекунд*/
+  Function.prototype.defer = function(ms) {
+    var f = this;
+
+    return function() {
+      var context = this,
+        arg = arguments;
+
+      setTimeout(function() {
+        alert('Отдохнула');
+        f.apply(context, arg);
+      }, ms);
+    }
   }
 
-  function CoffeeMachine(power, waterCapacity) { //наследник
-    Machine.apply(this);
-    var id, waterAmount = 0;
-
-    var oldEnable = this.enable.bind(this);
-    //переопределение методов
-    this.enable = function() {
-      console.log('Включилась зеленая лампочка!');
-      oldEnable();
-    };
-
-    var oldDisable = this.disable.bind(this);
-    //переопределение методов
-    this.disable = function() {
-      oldDisable();
-      //просто остановив
-      //clearTimeout(id);
-      //или
-      this.stop();
-    };
-
-    this.water = function(value) {
-      if (typeof value !== 'undefined') {
-        if (waterAmount + value <= waterCapacity) {
-          waterAmount += value;
-        } else {
-          waterAmount = waterCapacity;
-          console.log('Вылилось: ' + (value - waterCapacity));
-        }
-      } else {
-        return waterAmount;
-      }
-    };
-
-    var WATER_HEAT_CAPACITY = 4200;
-
-    var getBoilTime = function() {
-      var res = waterAmount * WATER_HEAT_CAPACITY * 80 / power;
-      console.log(res);
-      return res;
-    };
-
-    var onReady = function() {
-     console.log('Кофе готов!');
-    };
-
-    this.setReady = function(myFunc) {
-      if (typeof myFunc == 'function') {
-        onReady = myFunc;
-      }
-    };
-
-    this.run = function() {
-      if (!this._enabled) {
-         throw new Error("Кофеварка выключена");
-      }
-      if (!waterAmount) {
-        console.log('Сухого кофе??');
-      } else {
-        id = setTimeout(onReady, 3000);
-      }
-    };
-
-    this.stop = function() {
-      clearTimeout(id);
-      console.log('STOP');
-    };
+  var current = {
+    totalMileage: 0
   }
 
-  var coffee = new CoffeeMachine(1000, 2000);
+  Horse.prototype = current;
 
-  coffee.water(2500);
-  coffee.enable();
-  coffee.run();
-  coffee.setReady(function() {
-    console.log('%cКушать %cподано!', 'background: green; fontSize: 15px; color: #fff;', 'background: red; fontSize: 15px; color: #CC01;');
-  });
-  coffee.disable();
+  function Horse(name) {
+    this._name = name;
+    this._mileage = 0;
+    this._tired = 0;
+  }
+
+  Horse.prototype.run = function(metricArea) {
+    this.race = metricArea;
+
+    if (this.race < 0) { //так !this.race не работало
+      throw new Error('Ой, а лошадь бежит назад');
+    } else {
+      console.log("Надо бежать ", this.race, "км");
+      this._tiredHorse(this.race);
+      this._mileage += this.race;
+      Horse.prototype.totalMileage += this.race;
+    }
+  }
+
+  Horse.prototype._tiredHorse = function(currentRace) {
+    for (var i = 0; i < currentRace; i++) {
+      var Race = currentRace - i - 1;
+      console.log('Усталость>   ', ++this._tired, ' Осталось км из всего пути ', (currentRace - i - 1));
+      if (this._tired === 10) {
+        console.log('Устала очень! Передохнет минутку, потому что пробежала ', (i + 1));
+        this._tired = 0;
+        //this._tiredHorse.defer(1000)(currentRace - i - 1);
+        this._sleep(2000);
+        console.log('Отдохнула', this._name);
+        return this._tiredHorse.apply(currentRace - i - 1);
+      }
+    }
+  }
+
+  Horse.prototype._sleep = function(ms) {
+    ms += new Date().getTime();
+    while (new Date() < ms) {}
+  }
+
+  var h1 = new Horse('один');
+  var h2 = new Horse('два');
+  h1.run(3);
+  h1.run(10);
+
+  console.log('mil1 = ' + h1._mileage);
+  h2.run(17);
+  h2.run(5);
+  console.log('mil2 = ' + h2._mileage);
+  console.log('total = ' + h2.totalMileage);
+  console.log('total = ' + h1.totalMileage);
 })();

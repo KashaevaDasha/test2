@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+</head>
+<body>
+<script>
+/*document.body.innerHTML='<table id="own_table" border="1"></table>';*/
+function randomInteger(min, max) {
+	return Math.floor(min + Math.random() * (max + 1 - min));
+}
+
+function getRandomColor() {
+    var letters = '0123456789ABCDEF'.split('');
+    var color = '#';
+    for (var i = 0; i < 6; i++ ) {
+        color += letters[Math.round(Math.random() * 15)];
+    }
+    return color;
+}
+
+/*function get_random_color() {
+    return "#"+((1<<24)*Math.random()|0).toString(16);
+}*/
+
+var MAX_AMOUMT_OF_CEELS=100;
+
+//Cоздание таблицы
+var table = document.createElement('table');
+
+//Управление атрибутами
+table.setAttribute('id','own_table');
+table.setAttribute('border','2');
+table.setAttribute('rules','all');
+table.setAttribute('width','1300');
+table.setAttribute('height','600');
+
+//Создание строк и столбцов, их заполнение
+for (var i = 0; i < MAX_AMOUMT_OF_CEELS; i++) {
+	var row=table.insertRow(i);
+	for (var j = 0; j < MAX_AMOUMT_OF_CEELS; j++) {
+		var cell = row.insertCell(j);
+		cell.setAttribute('width','100');
+		cell.setAttribute('align','center');
+		cell.innerHTML=randomInteger(0, 255);
+		cell.style.background=getRandomColor();
+		cell.style.color=getRandomColor();
+	}
+}
+
+//добавить table в иерархическую структуру документа
+document.body.appendChild(table);
+</script>
+</body>
+</html>

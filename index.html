@@ -4,57 +4,17 @@
 	<meta charset="UTF-8">
 	<script src="JS\work.js"></script>
 	<style>
-		 * {
-	      margin: 0;
-	      padding: 0;
-	    }
-		.wrap input[type=checkbox] {
-			display: none;
-		}
-		.wrap .btn {
-			display: inline-block;
-			width: 20px;
-			height: 20px;
-			border: 1px solid #ddd;
-		}
-		.wrap input[type=checkbox]:checked+.btn {
-			background-color: #f0f;
-			border:2px solid #ddd;
-		}
-		#football-pitch {
-			border:20px solid #ddd;
-			position:relative;
-			margin-left: 50px;
-			margin-top: 50px;
-			width: 300px;
-			height: 300px;
-			background-color:#0f0;
-		}
-		#football-pitch #ball {
-			position: absolute;
-			top: 0;
-			left: 0;
-			border-radius: 50%;
-			min-width: 30px;
-     		min-height: 30px;
-      		box-shadow: inset 0 0 5px #000000;
-     		background-color: #f0f;
-     	    transition: 0.5s linear all;
-		}
+	td {
+      border: 1px solid #bbb;
+      border-radius: 4px;
+      width: 20px;
+      height: 20px;
+      text-align: center;
+    }
 	</style>
 	<title>Document</title>
 </head>
 <body>
 
-<div id="football-pitch">
-	<div id="ball"></div>
-</div>
-<br/>
-<div class="wrap">
-	<label id='lbl'> button
-		<input type="checkbox">
-		<div class='btn'></div>
-	</label>
-</div>
 </body>
 </html>

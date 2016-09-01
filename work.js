@@ -1,5 +1,5 @@
 window.onload = function() {
-
+// это табличка)) анимация
 	var table = drawTable();
 	var config = processTable(table);
 	var timer;
